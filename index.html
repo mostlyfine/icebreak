@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    <title>今日の小ネタ</title>
+  </head>
+  <body>
+    <div id="container">
+      <h1 v-text='question'></h1>
+      <h3 v-text='order'></h3>
+      <div v-if='loadCompleted'>
+        <button @click='shuffle'>shuffle</button>
+      </div>
+      <div v-else>
+        loading...
+      </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script language="ecmascript" type="text/ecmascript">
+      new Vue({
+        el: '#container',
+        data() {
+          return {
+            question: '今日の小ネタ',
+            questions: [],
+            order: '',
+            orders: [
+              '年齢の高い順',
+              '年齢の低い順',
+              '入社の古い順',
+              '入社の新しい順',
+              '生まれ月の早い順(1-12)',
+              '生まれ月の遅い順(12-1)',
+              '姓のアルファベット順(A-Z)',
+              '名のアルファベット順(A-Z)',
+              '身長の高い順',
+              '身長の低い順',
+              '入室の早い順',
+              '入室の遅い順'
+            ]
+          }
+        },
+        computed: {
+          loadCompleted() {
+            return this.questions.length > 0;
+          }
+        },
+        methods: {
+          shuffle() {
+            this.order = this.orders[Math.floor(Math.random() * this.orders.length)];
+            this.question = this.questions[Math.floor(Math.random() * this.questions.length)];
+          },
+          loadQuestions() {
+            axios.get('https://script.googleusercontent.com/macros/echo?user_content_key=s6N_M9y6TiJt34upIGP-gKbxj-POw5jmWhkEeff0qLhugbDMUTgTlhaokQJ9KjjxalXVLIOp9x_LVVq9qMzuIxQvHBOA7KBDm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnA_5i5xtJaPVoAWFxsOuKLitqFzBIRMZEJV9s-Pj_UaxV9vWzePWNxX9oN9SbPg3h-QPJy_W6EHjYeShQJBHCqxP_7tQ8ZQrzdz9Jw9Md8uu&lib=M3ejvBOArhEEDPC5En7CEAMPd-Ha7O2zk')
+            .then((res) => {
+              this.questions = res.data.map((value, index, array) => {
+                return value.question;
+              });
+            })
+          }
+        },
+        created() {
+          this.loadQuestions()
+        }
+      })
+    </script>
+  </body>
+</html>
+
