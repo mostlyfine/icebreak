@@ -10,8 +10,8 @@
     <div id="container">
       <h1 v-text='question'></h1>
       <h3 v-text='order'></h3>
-      <div v-if='loadCompleted'>
-        <button @click='shuffle'>shuffle</button>
+      <div v-if='loaded'>
+        <button @click='next'>next &gt;</button>
       </div>
       <div v-else>
         loading...
@@ -22,10 +22,12 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <script language="ecmascript" type="text/ecmascript">
+      const API='https://script.googleusercontent.com/macros/echo?user_content_key=s6N_M9y6TiJt34upIGP-gKbxj-POw5jmWhkEeff0qLhugbDMUTgTlhaokQJ9KjjxalXVLIOp9x_LVVq9qMzuIxQvHBOA7KBDm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnA_5i5xtJaPVoAWFxsOuKLitqFzBIRMZEJV9s-Pj_UaxV9vWzePWNxX9oN9SbPg3h-QPJy_W6EHjYeShQJBHCqxP_7tQ8ZQrzdz9Jw9Md8uu&lib=M3ejvBOArhEEDPC5En7CEAMPd-Ha7O2zk'
       new Vue({
         el: '#container',
         data() {
           return {
+            loaded: false,
             question: '今日の小ネタ',
             questions: [],
             order: '',
@@ -36,8 +38,12 @@
               '入社の新しい順',
               '生まれ月の早い順(1-12)',
               '生まれ月の遅い順(12-1)',
-              '姓のアルファベット順(A-Z)',
-              '名のアルファベット順(A-Z)',
+              '生まれ日の早い順(1-31)',
+              '生まれ日の遅い順(31-1)',
+              '姓のアルファベット昇順(A-Z)',
+              '姓のアルファベット降順(Z-A)',
+              '名のアルファベット昇順(A-Z)',
+              '名のアルファベット降順(Z-A)',
               '身長の高い順',
               '身長の低い順',
               '入室の早い順',
@@ -45,22 +51,29 @@
             ]
           }
         },
-        computed: {
-          loadCompleted() {
-            return this.questions.length > 0;
-          }
-        },
         methods: {
-          shuffle() {
-            this.order = this.orders[Math.floor(Math.random() * this.orders.length)];
-            this.question = this.questions[Math.floor(Math.random() * this.questions.length)];
+          random(val) {
+            return Math.floor(Math.random() * val)
+          },
+          next() {
+            this.question = this.questions.shift()
+            this.questions.push(this.question)
+            this.order = this.orders[this.random(this.orders.length)]
+          },
+          shuffle(arr) {
+            for(let i = arr.length-1 ; i > 0 ; i--) {
+              let j = this.random(i+1);
+              [arr[i], arr[j]] = [arr[j], arr[i]]
+            }
           },
           loadQuestions() {
-            axios.get('https://script.googleusercontent.com/macros/echo?user_content_key=s6N_M9y6TiJt34upIGP-gKbxj-POw5jmWhkEeff0qLhugbDMUTgTlhaokQJ9KjjxalXVLIOp9x_LVVq9qMzuIxQvHBOA7KBDm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnA_5i5xtJaPVoAWFxsOuKLitqFzBIRMZEJV9s-Pj_UaxV9vWzePWNxX9oN9SbPg3h-QPJy_W6EHjYeShQJBHCqxP_7tQ8ZQrzdz9Jw9Md8uu&lib=M3ejvBOArhEEDPC5En7CEAMPd-Ha7O2zk')
+            axios.get(API)
             .then((res) => {
               this.questions = res.data.map((value, index, array) => {
-                return value.question;
+                return value.question
               });
+              this.shuffle(this.questions)
+              this.loaded = true
             })
           }
         },
